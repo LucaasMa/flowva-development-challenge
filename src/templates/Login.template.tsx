@@ -15,7 +15,7 @@ const LoginTemplate = () => {
             <form className="w-full text-[#111827]">
               <label
                 htmlFor="email"
-                className="block text-sm font-medium mb-2 text-[#111827]"
+                className="block text-sm font-normal mb-2 text-[#111827]"
               >
                 Email
               </label>
@@ -31,7 +31,7 @@ const LoginTemplate = () => {
               </div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium mb-2 text-[#111827]"
+                className="block text-sm font-normal mb-2 text-[#111827]"
               >
                 Password
               </label>
@@ -48,14 +48,14 @@ const LoginTemplate = () => {
                 </div>
                 <button
                   type="button"
-                  className="absolute right-3 border-none text-[#A78BFA] h-fit font-medium text-xs top-0 bottom-0 m-auto"
+                  className="absolute right-3 border-none text-[#A78BFA] h-fit font-normal text-xs top-0 bottom-0 m-auto"
                 >
                   Show
                 </button>
               </div>
               <div className="flex justify-end items-center w-full mb-2">
                 <a
-                  className="mt-2 text-[#9013fe] no-underline text-sm font-medium hover:underline"
+                  className="mt-2 text-[#9013fe] no-underline text-sm font-normal hover:underline"
                   href="#"
                 >
                   Forgot Password?
@@ -63,14 +63,14 @@ const LoginTemplate = () => {
               </div>
               <button
                 type="submit"
-                className="w-full h-[55px] gap-2 flex justify-center text-base items-center p-[11px] text-center bg-[#9013FE] text-white font-medium border-none transition-colors ease-linear duration-[.2s] rounded-[100px] hover:bg-[#6D28D9]"
+                className="w-full h-[55px] gap-2 flex justify-center text-base items-center p-[11px] text-center bg-[#9013FE] text-white font-normal border-none transition-colors ease-linear duration-[.2s] rounded-[100px] hover:bg-[#6D28D9]"
               >
                 Sign in
               </button>
             </form>
             <div className="relative flex items-center w-full my-[20px]">
               <div className="flex-grow h-px bg-[#EDE9FE]"></div>
-              <span className="text-[13px] text-[#A78BFA] font-medium bg-white px-3">
+              <span className="text-[13px] text-[#A78BFA] font-normal bg-white px-3">
                 or
               </span>
               <div className="flex-grow h-px bg-[#EDE9FE]"></div>
@@ -107,8 +107,8 @@ const LoginTemplate = () => {
               <p className="text-[#6B7280]">
                 Don't have an account?{" "}
                 <a
-                  href="#"
-                  className="text-[#9013fe] no-underline font-medium hover:underline"
+                  href="/signup"
+                  className="text-[#9013fe] no-underline font-normal hover:underline"
                 >
                   Sign up
                 </a>
