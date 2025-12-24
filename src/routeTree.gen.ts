@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SigninRouteImport } from './routes/signin'
+import { Route as EarnRewardsRouteImport } from './routes/earn-rewards'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SignupRoute = SignupRouteImport.update({
@@ -23,6 +24,11 @@ const SigninRoute = SigninRouteImport.update({
   path: '/signin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EarnRewardsRoute = EarnRewardsRouteImport.update({
+  id: '/earn-rewards',
+  path: '/earn-rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,30 +37,34 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/earn-rewards': typeof EarnRewardsRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/earn-rewards': typeof EarnRewardsRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/earn-rewards': typeof EarnRewardsRoute
   '/signin': typeof SigninRoute
   '/signup': typeof SignupRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signin' | '/signup'
+  fullPaths: '/' | '/earn-rewards' | '/signin' | '/signup'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signin' | '/signup'
-  id: '__root__' | '/' | '/signin' | '/signup'
+  to: '/' | '/earn-rewards' | '/signin' | '/signup'
+  id: '__root__' | '/' | '/earn-rewards' | '/signin' | '/signup'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  EarnRewardsRoute: typeof EarnRewardsRoute
   SigninRoute: typeof SigninRoute
   SignupRoute: typeof SignupRoute
 }
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SigninRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/earn-rewards': {
+      id: '/earn-rewards'
+      path: '/earn-rewards'
+      fullPath: '/earn-rewards'
+      preLoaderRoute: typeof EarnRewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  EarnRewardsRoute: EarnRewardsRoute,
   SigninRoute: SigninRoute,
   SignupRoute: SignupRoute,
 }
