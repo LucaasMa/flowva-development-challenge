@@ -1,31 +1,34 @@
 import React from "react";
 import FlowvaTabs from "../components/FlowvaTabs";
 import {
-  IconHome,
+  IconAward,
+  IconBell,
+  IconCalendar,
+  IconCalendarLucide,
+  IconCopy,
   IconDiscover,
+  IconFacebook,
+  IconGift,
+  IconHamburger,
+  IconHome,
   IconLibrary,
-  IconTechStack,
-  IconSubscriptions,
+  IconLinkedIn,
   IconRewardsHub,
   IconSettings,
-  IconBell,
-  IconAward,
-  IconCalendar,
-  IconZap,
-  IconCalendarLucide,
-  IconUserPlus,
-  IconGift,
-  IconStar,
   IconShare,
-  IconUsers,
-  IconCopy,
-  IconFacebook,
+  IconStar,
+  IconSubscriptions,
+  IconTechStack,
   IconTwitter,
-  IconLinkedIn,
+  IconUserPlus,
+  IconUsers,
   IconWhatsApp,
-  IconHamburger,
+  IconZap,
 } from "../components/RewardsIcons";
 import { RewardsLottie } from "../components/RewardsLottie";
+import type { UserProfile } from "../utils/api";
+import { addPoints, canClaimToday, getUserProfile } from "../utils/api";
+import { useNavigate } from "@tanstack/react-router";
 
 const SidebarItem = ({
   icon,
@@ -54,275 +57,364 @@ const SectionHeader = ({ title }: { title: string }) => (
   </h2>
 );
 
-const EarnPointsTabContent = () => (
-  <div>
+const EarnPointsTabContent = ({
+  userProfile,
+  onClaimPoints,
+}: {
+  userProfile: UserProfile | null;
+  onClaimPoints: () => Promise<void>;
+}) => {
+  const [claiming, setClaiming] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  const navigate = useNavigate();
+
+  const canClaim = canClaimToday(userProfile?.last_claim_date || null);
+
+  const handleClaimPoints = async () => {
+    setClaiming(true);
+    setError(null);
+    try {
+      const result = await addPoints(5);
+      if (result.success) {
+        await onClaimPoints();
+      } else {
+        setError(result.error || "Failed to claim points");
+      }
+    } catch (error) {
+      setError("An error occurred while claiming points");
+      console.error("Error claiming points:", error);
+    } finally {
+      setClaiming(false);
+    }
+  };
+
+  return (
     <div>
-      <SectionHeader title="Your Rewards Journey" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Points Balance Card */}
-        <div className="shadow-[0_5px_15px_rgba(0,_0,_0,_0.05)] min-h-[337px] transition-all rounded-[16px] hover:translate-y-[-5px] hover:shadow-[0_10px_25px_rgba(0,_0,_0,_0.1)] border border-[#f3f4f6] overflow-hidden duration-200">
-          <div className="p-[1rem] relative border border-b-[#f3f4f6] bg-[#eef2ff] border-t-0 border-r-0 border-l-0">
-            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-700">
-              <IconAward />
-              Points Balance
-            </h3>
-          </div>
-          <div className="p-[1rem]">
-            <div className="flex justify-between items-center">
-              <div className="font-extrabold text-[36px] text-[#9013fe] m-[10px_0]">
-                5
+      <div>
+        <SectionHeader title="Your Rewards Journey" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Points Balance Card */}
+          <div className="shadow-[0_5px_15px_rgba(0,_0,_0,_0.05)] min-h-[337px] transition-all rounded-[16px] hover:translate-y-[-5px] hover:shadow-[0_10px_25px_rgba(0,_0,_0,_0.1)] border border-[#f3f4f6] overflow-hidden duration-200">
+            <div className="p-[1rem] relative border border-b-[#f3f4f6] bg-[#eef2ff] border-t-0 border-r-0 border-l-0">
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-700">
+                <IconAward />
+                Points Balance
+              </h3>
+            </div>
+            <div className="p-[1rem]">
+              <div className="flex justify-between items-center">
+                <div className="font-extrabold text-[36px] text-[#9013fe] m-[10px_0]">
+                  {userProfile?.total_points || 0}
+                </div>
+                <div className="lf-player-container">
+                  <RewardsLottie />
+                </div>
               </div>
-              <div className="lf-player-container">
-                <RewardsLottie />
+              <div className="mt-4">
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-gray-600">
+                    Progress to{" "}
+                    <span className="font-medium">$5 Gift Card</span>
+                  </span>
+                  <span className="font-medium">
+                    {userProfile?.total_points || 0}/5000
+                  </span>
+                </div>
+                <div className="h-[8px] bg-[#e5e7eb] rounded-[9999px] overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-br from-[#9013fe] to-[#FF9FF5] rounded-full transition-[width] duration-500 ease-in-out"
+                    style={{
+                      width: `${Math.min(
+                        ((userProfile?.total_points || 0) / 5000) * 100,
+                        100
+                      )}%`,
+                    }}
+                  ></div>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  🚀 Just getting started — keep earning points!
+                </p>
               </div>
             </div>
-            <div className="mt-4">
-              <div className="flex justify-between text-sm mb-1">
-                <span className="text-gray-600">
-                  Progress to <span className="font-medium">$5 Gift Card</span>
-                </span>
-                <span className="font-medium">5/5000</span>
+          </div>
+
+          {/* Daily Streak Card */}
+          <div className="shadow-[0_5px_15px_rgba(0,_0,_0,_0.05)] rounded-[16px] hover:translate-y-[-5px] hover:shadow-[0_10px_25px_rgba(0,_0,_0,_0.1)] border border-[#f3f4f6] overflow-hidden transition-shadow duration-200">
+            <div className="p-[1rem] relative border border-b-[#f3f4f6] bg-[#eef2ff] border-t-0 border-r-0 border-l-0">
+              <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-700">
+                <IconCalendar />
+                Daily Streak
+              </h3>
+            </div>
+            <div className="p-4 pt-[17px]">
+              <div className="font-extrabold text-[36px] text-[#9013fe] mb-2">
+                {userProfile?.current_streak || 0}{" "}
+                {(userProfile?.current_streak || 0) === 1 ? "day" : "days"}
               </div>
-              <div className="h-[8px] bg-[#e5e7eb] rounded-[9999px] overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-br from-[#9013fe] to-[#FF9FF5] rounded-full transition-[width] duration-500 ease-in-out"
-                  style={{ width: "0.1%" }}
-                ></div>
+              <div className="flex mt-[18px] space-x-2 justify-center">
+                {["M", "T", "W", "T", "F", "S", "S"].map((day, i) => {
+                  const today = new Date().getDay(); // 0 = Sunday, 1 = Monday, etc.
+                  // Convert to Monday-first (0 = Monday, 6 = Sunday)
+                  const todayIndex = today === 0 ? 6 : today - 1;
+                  const isToday = i === todayIndex;
+
+                  // Only show active (purple) for days that have been claimed
+                  // This is based on whether the user claimed today
+                  const lastClaimDate = userProfile?.last_claim_date;
+                  let isActive = false;
+
+                  if (lastClaimDate) {
+                    const lastClaim = new Date(lastClaimDate);
+                    const now = new Date();
+
+                    // Check if last claim was today
+                    const isSameDay =
+                      lastClaim.getDate() === now.getDate() &&
+                      lastClaim.getMonth() === now.getMonth() &&
+                      lastClaim.getFullYear() === now.getFullYear();
+
+                    // Only make today purple if the user claimed today
+                    if (isSameDay && isToday) {
+                      isActive = true;
+                    }
+                  }
+
+                  return (
+                    <div
+                      key={i}
+                      className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-200 ${
+                        isActive
+                          ? "bg-[#9013fe] text-white"
+                          : "bg-gray-200 text-gray-500"
+                      } ${
+                        isToday ? "ring-2 ring-[#9013fe] ring-offset-2" : ""
+                      }`}
+                    >
+                      {day}
+                    </div>
+                  );
+                })}
               </div>
-              <p className="text-xs text-gray-500 mt-2">
-                🚀 Just getting started — keep earning points!
+              <p className="text-[0.875rem] text-gray-600 text-center mt-3">
+                Check in daily to earn +5 points
+              </p>
+              {error && (
+                <div className="mt-3 p-2 bg-red-50 border border-red-200 text-red-700 rounded-md text-xs text-center">
+                  {error}
+                </div>
+              )}
+              <button
+                onClick={handleClaimPoints}
+                disabled={claiming || !canClaim}
+                className={`mt-3 w-full py-3 px-6 rounded-full text-[14px] font-medium font-[Segoe UI] flex items-center justify-center gap-2 transition-all duration-200 border-none ${
+                  canClaim && !claiming
+                    ? "bg-[#9013fe] text-white hover:shadow-[0_4px_12px_rgba(144,_19,_254,_0.2)] hover:translate-y-[-2px] cursor-pointer"
+                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                }`}
+              >
+                <IconZap />
+                {claiming
+                  ? "Claiming..."
+                  : canClaim
+                  ? "Claim Today's Points"
+                  : "Claimed Today"}
+              </button>
+            </div>
+          </div>
+
+          {/* Top Tool Spotlight Card */}
+          <div className="hover:translate-y-[-3px] hover:shadow-[0_8px_20px_rgba(0,_0,_0,_0.1)] bg-white rounded-[16px] shadow-[0_5px_15px_rgba(0,0,0,0.05)] overflow-hidden border border-[#f3f4f6] transition-all duration-300 ease-in-out">
+            <div className="p-4 bg-[linear-gradient(135deg,_#9013FE_0%,_#70D6FF_100%)] text-white relative overflow-hidden">
+              <span className="absolute top-[15px] left-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold">
+                Featured
+              </span>
+              <div className="flex items-center justify-between mt-[20px]">
+                <h3 className="text-[1.25rem] font-bold relative z-[2]">
+                  Top Tool Spotlight
+                </h3>
+                <div className="overflow-hidden relative rounded-full size-10 md:size-16">
+                  <img
+                    src="https://api.flowvahub.com/storage/v1/object/public/icons//reclaim%20(1).png"
+                    alt="Reclaim"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+              <p className="text-lg">
+                <strong> Reclaim</strong>
               </p>
             </div>
-          </div>
-        </div>
-
-        {/* Daily Streak Card */}
-        <div className="shadow-[0_5px_15px_rgba(0,_0,_0,_0.05)] rounded-[16px] hover:translate-y-[-5px] hover:shadow-[0_10px_25px_rgba(0,_0,_0,_0.1)] border border-[#f3f4f6] overflow-hidden transition-shadow duration-200">
-          <div className="p-[1rem] relative border border-b-[#f3f4f6] bg-[#eef2ff] border-t-0 border-r-0 border-l-0">
-            <h3 className="text-lg font-semibold flex items-center gap-2 text-gray-700">
-              <IconCalendar />
-              Daily Streak
-            </h3>
-          </div>
-          <div className="p-4 pt-[17px]">
-            <div className="font-extrabold text-[36px] text-[#9013fe] mb-2">
-              0 day
-            </div>
-            <div className="flex mt-[18px] space-x-2 justify-center">
-              {["M", "T", "W"].map((day, i) => (
-                <div
-                  key={i}
-                  className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-200 bg-gray-200 text-gray-500"
-                >
-                  {day}
+            <div className="p-[1rem]">
+              <div className="flex justify-start mb-[1rem]">
+                <div className="w-[24px] h-[24px] animate-pulse bg-[#eef2ff] rounded-[6px] flex items-center justify-center mr-[1rem] flex-shrink-0 text-[#9013fe]">
+                  <IconCalendarLucide />
                 </div>
-              ))}
-              <div className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-200 bg-gray-200 text-gray-500 ring-2 ring-[#9013fe] ring-offset-2">
-                T
-              </div>
-              {["F", "S", "S"].map((day, i) => (
-                <div
-                  key={i}
-                  className="h-10 w-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-200 bg-gray-200 text-gray-500"
-                >
-                  {day}
+                <div className="flex-1">
+                  <h4 className="mb-[0.25rem] font-semibold">
+                    Automate and Optimize Your Schedule
+                  </h4>
+                  <p className="text-[0.875rem] text-gray-600">
+                    Reclaim.ai is an AI-powered calendar assistant that
+                    automatically schedules your tasks, meetings, and breaks to
+                    boost productivity. Free to try — earn Flowva Points when
+                    you sign up!
+                  </p>
                 </div>
-              ))}
-            </div>
-            <p className="text-[0.875rem] text-gray-600 text-center mt-3">
-              Check in daily to to earn +5 points
-            </p>
-            <button className="mt-3 w-full py-3 px-6 rounded-full text-[14px] font-medium font-[Segoe UI] flex items-center justify-center gap-2 transition-all duration-200 bg-[#9013fe] text-white hover:shadow-[0_4px_12px_rgba(144,_19,_254,_0.2)] hover:translate-y-[-2px] border-none cursor-pointer">
-              <IconZap />
-              Claim Today's Points
-            </button>
-          </div>
-        </div>
-
-        {/* Top Tool Spotlight Card */}
-        <div className="hover:translate-y-[-3px] hover:shadow-[0_8px_20px_rgba(0,_0,_0,_0.1)] bg-white rounded-[16px] shadow-[0_5px_15px_rgba(0,0,0,0.05)] overflow-hidden border border-[#f3f4f6] transition-all duration-300 ease-in-out">
-          <div className="p-4 bg-[linear-gradient(135deg,_#9013FE_0%,_#70D6FF_100%)] text-white relative overflow-hidden">
-            <span className="absolute top-[15px] left-4 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold">
-              Featured
-            </span>
-            <div className="flex items-center justify-between mt-[20px]">
-              <h3 className="text-[1.25rem] font-bold relative z-[2]">
-                Top Tool Spotlight
-              </h3>
-              <div className="overflow-hidden relative rounded-full size-10 md:size-16">
-                <img
-                  src="https://api.flowvahub.com/storage/v1/object/public/icons//reclaim%20(1).png"
-                  alt="Reclaim"
-                  className="w-full h-full object-cover"
-                />
               </div>
             </div>
-            <p className="text-lg">
-              <strong> Reclaim</strong>
-            </p>
-          </div>
-          <div className="p-[1rem]">
-            <div className="flex justify-start mb-[1rem]">
-              <div className="w-[24px] h-[24px] animate-pulse bg-[#eef2ff] rounded-[6px] flex items-center justify-center mr-[1rem] flex-shrink-0 text-[#9013fe]">
-                <IconCalendarLucide />
-              </div>
-              <div className="flex-1">
-                <h4 className="mb-[0.25rem] font-semibold">
-                  Automate and Optimize Your Schedule
-                </h4>
-                <p className="text-[0.875rem] text-gray-600">
-                  Reclaim.ai is an AI-powered calendar assistant that
-                  automatically schedules your tasks, meetings, and breaks to
-                  boost productivity. Free to try — earn Flowva Points when you
-                  sign up!
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="px-[1rem] py-[5px] flex justify-between items-center border border-t-[#f3f4f6] border-b-0 border-r-0 border-l-0">
-            <button className="bg-[#9013fe] hover:bg-[#8628da] text-white py-2 px-4 rounded-full font-semibold transition-all duration-200 flex items-center justify-center gap-2 border-0 cursor-pointer">
-              <IconUserPlus /> Sign up
-            </button>
-            <button className="bg-[linear-gradient(45deg,#9013FE,#FF8687)] text-white py-2 px-4 rounded-full font-semibold text-sm border-none cursor-pointer flex items-center gap-2">
-              <IconGift /> Claim 50 pts
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div className="space-y-6">
-      <SectionHeader title="Earn More Points" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Refer and win */}
-        <div className="transition-all hover:border-[#9013fe] hover:translate-y-[-5px] hover:shadow-[0_10px_25px_rgba(0,_0,_0,_0.1)] ease-linear duration-200 border border-[#e5e7eb] rounded-xl overflow-hidden">
-          <div className="p-[1rem] border border-b-[#f3f4f6] border-t-0 border-r-0 border-l-0 bg-white flex items-center gap-[0.75rem]">
-            <div className="w-[40px] h-[40px] rounded-[10px] flex items-center justify-center flex-shrink-0 bg-[rgba(228,144,230,0.1)] text-[#9013fe]">
-              <IconStar />
-            </div>
-            <div>
-              <h3 className="font-semibold">Refer and win 10,000 points!</h3>
-            </div>
-          </div>
-          <div className="p-[1rem]">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm">
-                  Invite 3 friends by Nov 20 and earn a chance to be one of 5
-                  winners of{" "}
-                  <span className="text-[#9013fe]">10,000 points</span>. Friends
-                  must complete onboarding to qualify.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Share Your Stack */}
-        <div className="transition-all hover:border-[#9013fe] hover:translate-y-[-5px] hover:shadow-[0_10px_25px_rgba(0,_0,_0,_0.1)] ease-linear duration-200 border border-[#e5e7eb] rounded-xl overflow-hidden">
-          <div className="p-[1rem] border border-b-[#f3f4f6] border-t-0 border-r-0 border-l-0 bg-white flex items-center gap-[0.75rem]">
-            <div className="w-[40px] h-[40px] rounded-[10px] flex items-center justify-center flex-shrink-0 bg-[rgba(144,_19,_254,_0.1)] text-[#9013fe]">
-              <IconShare />
-            </div>
-            <div>
-              <h3 className="font-semibold">Share Your Stack</h3>
-              <p className="text-xs text-gray-500">Earn +25 pts</p>
-            </div>
-          </div>
-          <div className="p-[1rem]">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-sm">Share your tool stack</p>
-              </div>
-              <button className="bg-[#eef2ff] hover:text-white hover:bg-[#9013fe] text-[#9013fe] py-2 px-4 rounded-full font-semibold text-sm transition-all duration-200 inline-flex items-center gap-2 border-0 cursor-pointer">
-                <IconShare /> Share
+            <div className="px-[1rem] py-[5px] flex justify-between items-center border border-t-[#f3f4f6] border-b-0 border-r-0 border-l-0">
+              <button
+                onClick={() =>
+                  window.open(
+                    "https://reclaim.ai/?utm_campaign=partnerstack&utm_term=ps_16ee8d9da128&pscd=go.reclaim.ai&ps_partner_key=MTZlZThkOWRhMTI4&ps_xid=XaydPewYkdSzo8&gsxid=XaydPewYkdSzo8&gspk=MTZlZThkOWRhMTI4"
+                  )
+                }
+                className="bg-[#9013fe] hover:bg-[#8628da] text-white py-2 px-4 rounded-full font-semibold transition-all duration-200 flex items-center justify-center gap-2 border-0 cursor-pointer"
+              >
+                <IconUserPlus /> Sign up
+              </button>
+              <button className="bg-[linear-gradient(45deg,#9013FE,#FF8687)] text-white py-2 px-4 rounded-full font-semibold text-sm border-none cursor-pointer flex items-center gap-2">
+                <IconGift /> Claim 50 pts
               </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <div className="space-y-6">
-      <SectionHeader title="Refer & Earn" />
-      <div className="shadow-[0_5px_15px_rgba(0,_0,_0,_0.05)] rounded-[16px] hover:translate-y-[-5px] hover:shadow-[0_10px_25px_rgba(0,_0,_0,_0.1)] border border-[#f3f4f6] overflow-hidden transition-shadow duration-200">
-        <div className="p-[1rem] relative border border-b-[#f3f4f6] bg-[#eef2ff] border-t-0 border-r-0 border-l-0">
-          <div className="flex items-center gap-3">
-            <IconUsers />
-            <div>
-              <h3 className="text-xl font-semibold text-gray-700">
-                Share Your Link
-              </h3>
-              <p className="text-gray-500 text-sm">
-                Invite friends and earn 25 points when they join!
-              </p>
+      <div className="space-y-6">
+        <SectionHeader title="Earn More Points" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Refer and win */}
+          <div className="transition-all hover:border-[#9013fe] hover:translate-y-[-5px] hover:shadow-[0_10px_25px_rgba(0,_0,_0,_0.1)] ease-linear duration-200 border border-[#e5e7eb] rounded-xl overflow-hidden">
+            <div className="p-[1rem] border border-b-[#f3f4f6] border-t-0 border-r-0 border-l-0 bg-white flex items-center gap-[0.75rem]">
+              <div className="w-[40px] h-[40px] rounded-[10px] flex items-center justify-center flex-shrink-0 bg-[rgba(228,144,230,0.1)] text-[#9013fe]">
+                <IconStar />
+              </div>
+              <div>
+                <h3 className="font-semibold">Refer and win 10,000 points!</h3>
+              </div>
+            </div>
+            <div className="p-[1rem]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">
+                    Invite 3 friends by Nov 20 and earn a chance to be one of 5
+                    winners of{" "}
+                    <span className="text-[#9013fe]">10,000 points</span>.
+                    Friends must complete onboarding to qualify.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-        <div className="p-[1rem]">
-          <div className="space-y-6">
-            <div className="flex justify-between mb-[1rem]">
-              <div className="text-center p-[0.5rem] flex-1">
-                <div className="text-[1.5rem] font-semibold text-[#9013fe]">
-                  0
-                </div>
-                <div className="text-gray-600">Referrals</div>
+
+          {/* Share Your Stack */}
+          <div className="transition-all hover:border-[#9013fe] hover:translate-y-[-5px] hover:shadow-[0_10px_25px_rgba(0,_0,_0,_0.1)] ease-linear duration-200 border border-[#e5e7eb] rounded-xl overflow-hidden">
+            <div className="p-[1rem] border border-b-[#f3f4f6] border-t-0 border-r-0 border-l-0 bg-white flex items-center gap-[0.75rem]">
+              <div className="w-[40px] h-[40px] rounded-[10px] flex items-center justify-center flex-shrink-0 bg-[rgba(144,_19,_254,_0.1)] text-[#9013fe]">
+                <IconShare />
               </div>
-              <div className="text-center p-[0.5rem] flex-1">
-                <div className="text-[1.5rem] font-semibold text-[#9013fe]">
-                  0
-                </div>
-                <div className="text-gray-600">Points Earned</div>
+              <div>
+                <h3 className="font-semibold">Share Your Stack</h3>
+                <p className="text-xs text-gray-500">Earn +25 pts</p>
               </div>
             </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <p className="text-sm mb-2 text-gray-700">
-                Your personal referral link:
-              </p>
-              <div className="relative">
-                <input
-                  type="text"
-                  readOnly
-                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent w-full pr-10"
-                  defaultValue="https://app.flowvahub.com/signup/?ref=lucas1246"
-                />
-                <button className="absolute right-[10px] top-1/2 -translate-y-1/2 cursor-pointer z-10 bg-transparent border-none">
-                  <IconCopy />
+            <div className="p-[1rem]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-sm">Share your tool stack</p>
+                </div>
+                <button className="bg-[#eef2ff] hover:text-white hover:bg-[#9013fe] text-[#9013fe] py-2 px-4 rounded-full font-semibold text-sm transition-all duration-200 inline-flex items-center gap-2 border-0 cursor-pointer">
+                  <IconShare /> Share
                 </button>
               </div>
             </div>
-            <div className="flex justify-center gap-[1rem] mt-[1rem]">
-              <button
-                className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white text-[18px] transition-transform duration-200 hover:translate-y-[-3px] border-none cursor-pointer"
-                style={{ background: "rgb(24, 119, 242)" }}
-              >
-                <IconFacebook />
-              </button>
-              <button
-                className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white text-[18px] transition-transform duration-200 hover:translate-y-[-3px] border-none cursor-pointer"
-                style={{ background: "black" }}
-              >
-                <IconTwitter />
-              </button>
-              <button
-                className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white text-[18px] transition-transform duration-200 hover:translate-y-[-3px] border-none cursor-pointer"
-                style={{ background: "rgb(0, 119, 181)" }}
-              >
-                <IconLinkedIn />
-              </button>
-              <button
-                className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white text-[18px] transition-transform duration-200 hover:translate-y-[-3px] border-none cursor-pointer"
-                style={{ background: "rgb(37, 211, 102)" }}
-              >
-                <IconWhatsApp />
-              </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <SectionHeader title="Refer & Earn" />
+        <div className="shadow-[0_5px_15px_rgba(0,_0,_0,_0.05)] rounded-[16px] hover:translate-y-[-5px] hover:shadow-[0_10px_25px_rgba(0,_0,_0,_0.1)] border border-[#f3f4f6] overflow-hidden transition-shadow duration-200">
+          <div className="p-[1rem] relative border border-b-[#f3f4f6] bg-[#eef2ff] border-t-0 border-r-0 border-l-0">
+            <div className="flex items-center gap-3">
+              <IconUsers />
+              <div>
+                <h3 className="text-xl font-semibold text-gray-700">
+                  Share Your Link
+                </h3>
+                <p className="text-gray-500 text-sm">
+                  Invite friends and earn 25 points when they join!
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="p-[1rem]">
+            <div className="space-y-6">
+              <div className="flex justify-between mb-[1rem]">
+                <div className="text-center p-[0.5rem] flex-1">
+                  <div className="text-[1.5rem] font-semibold text-[#9013fe]">
+                    0
+                  </div>
+                  <div className="text-gray-600">Referrals</div>
+                </div>
+                <div className="text-center p-[0.5rem] flex-1">
+                  <div className="text-[1.5rem] font-semibold text-[#9013fe]">
+                    0
+                  </div>
+                  <div className="text-gray-600">Points Earned</div>
+                </div>
+              </div>
+              <div className="bg-purple-50 p-4 rounded-lg">
+                <p className="text-sm mb-2 text-gray-700">
+                  Your personal referral link:
+                </p>
+                <div className="relative">
+                  <input
+                    type="text"
+                    readOnly
+                    className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent w-full pr-10"
+                    defaultValue="https://app.flowvahub.com/signup/?ref=lucas1246"
+                  />
+                  <button className="absolute right-[10px] top-1/2 -translate-y-1/2 cursor-pointer z-10 bg-transparent border-none">
+                    <IconCopy />
+                  </button>
+                </div>
+              </div>
+              <div className="flex justify-center gap-[1rem] mt-[1rem]">
+                <button
+                  className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white text-[18px] transition-transform duration-200 hover:translate-y-[-3px] border-none cursor-pointer"
+                  style={{ background: "rgb(24, 119, 242)" }}
+                >
+                  <IconFacebook />
+                </button>
+                <button
+                  className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white text-[18px] transition-transform duration-200 hover:translate-y-[-3px] border-none cursor-pointer"
+                  style={{ background: "black" }}
+                >
+                  <IconTwitter />
+                </button>
+                <button
+                  className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white text-[18px] transition-transform duration-200 hover:translate-y-[-3px] border-none cursor-pointer"
+                  style={{ background: "rgb(0, 119, 181)" }}
+                >
+                  <IconLinkedIn />
+                </button>
+                <button
+                  className="w-[30px] h-[30px] rounded-full flex items-center justify-center text-white text-[18px] transition-transform duration-200 hover:translate-y-[-3px] border-none cursor-pointer"
+                  style={{ background: "rgb(37, 211, 102)" }}
+                >
+                  <IconWhatsApp />
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const RewardCard = ({
   emoji,
@@ -479,6 +571,35 @@ const RedeemRewardsTabContent = () => (
 );
 
 const RewardsTemplate = () => {
+  const [userProfile, setUserProfile] = React.useState<UserProfile | null>(
+    null
+  );
+  const [loading, setLoading] = React.useState(true);
+
+  const fetchUserProfile = async () => {
+    const profile = await getUserProfile();
+    setUserProfile(profile);
+    setLoading(false);
+  };
+
+  React.useEffect(() => {
+    fetchUserProfile();
+  }, []);
+
+  const handleClaimPoints = async () => {
+    await fetchUserProfile();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="text-lg text-gray-600">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col md:flex-row min-h-[100dvh] lg:h-screen lg:md:overflow-hidden w-full">
       {/* Sidebar */}
@@ -519,9 +640,11 @@ const RewardsTemplate = () => {
                   />
                 </div>
                 <div className="text-start">
-                  <span className="text-[0.9rem] font-semibold">Lucas</span>
+                  <span className="text-[0.9rem] font-semibold">
+                    {userProfile?.full_name || "User"}
+                  </span>
                   <p className="text-[0.8rem] text-[#718096] truncate overflow-x-hidden max-w-[153px]">
-                    lucasmauricio27@gmail.com
+                    {userProfile?.email || ""}
                   </p>
                 </div>
               </button>
@@ -571,7 +694,12 @@ const RewardsTemplate = () => {
                   {
                     key: "1",
                     label: "Earn Points",
-                    children: <EarnPointsTabContent />,
+                    children: (
+                      <EarnPointsTabContent
+                        userProfile={userProfile}
+                        onClaimPoints={handleClaimPoints}
+                      />
+                    ),
                   },
                   {
                     key: "2",
