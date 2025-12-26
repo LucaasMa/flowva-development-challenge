@@ -1,15 +1,6 @@
-# Flowva Rewards System
+# Flowva Rewards Page
 
-A modern web application for managing user rewards with daily point claiming, streak tracking, and reward redemption features.
-
-## Features
-
-- **User Authentication**: Secure email/password authentication with Supabase
-- **Daily Points Claiming**: Users can claim 5 points once every 24 hours
-- **Streak Tracking**: Visual daily streak system with week calendar
-- **Rewards Redemption**: Browse and unlock rewards with earned points
-- **Protected Routes**: Secure routes requiring authentication
-- **Responsive Design**: Mobile-first design with Tailwind CSS
+Recreate the Rewards page of https://www.flowvahub.com
 
 ## Tools & Technologies
 
