@@ -28,7 +28,6 @@ import {
 import { RewardsLottie } from "../components/RewardsLottie";
 import type { UserProfile } from "../utils/api";
 import { addPoints, canClaimToday, getUserProfile } from "../utils/api";
-import { useNavigate } from "@tanstack/react-router";
 
 const SidebarItem = ({
   icon,
@@ -66,8 +65,6 @@ const EarnPointsTabContent = ({
 }) => {
   const [claiming, setClaiming] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
-
-  const navigate = useNavigate();
 
   const canClaim = canClaimToday(userProfile?.last_claim_date || null);
 
@@ -551,7 +548,52 @@ const RedeemRewardsTabContent = () => (
               </span>
             </div>
           ),
-          children: <div />,
+          children: (
+            <div className="grid gap-[1.5rem] grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))] mt-6">
+              <RewardCard
+                emoji="💸"
+                title="$5 PayPal International"
+                description="Receive a $5 PayPal balance transfer directly to your PayPal account email."
+                cost={5000}
+                locked={true}
+              />
+              <RewardCard
+                emoji="🎁"
+                title="$5 Virtual Visa Card"
+                description="Use your $5 prepaid card to shop anywhere Visa is accepted online."
+                cost={5000}
+                locked={true}
+              />
+              <RewardCard
+                emoji="🎁"
+                title="$5 Apple Gift Card"
+                description="Redeem this $5 Apple Gift Card for apps, games, music, movies, and more on the App Store and iTunes."
+                cost={5000}
+                locked={true}
+              />
+              <RewardCard
+                emoji="🎁"
+                title="$5 Google Play Card"
+                description="Use this $5 Google Play Gift Card to purchase apps, games, movies, books, and more on the Google Play Store."
+                cost={5000}
+                locked={true}
+              />
+              <RewardCard
+                emoji="🎁"
+                title="$5 Amazon Gift Card"
+                description="Get a $5 digital gift card to spend on your favorite tools or platforms."
+                cost={5000}
+                locked={true}
+              />
+              <RewardCard
+                emoji="🎁"
+                title="$10 Amazon Gift Card"
+                description="Get a $10 digital gift card to spend on your favorite tools or platforms."
+                cost={10000}
+                locked={true}
+              />
+            </div>
+          ),
         },
         {
           key: "4",
@@ -563,7 +605,17 @@ const RedeemRewardsTabContent = () => (
               </span>
             </div>
           ),
-          children: <div />,
+          children: (
+            <div className="grid gap-[1.5rem] grid-cols-[repeat(auto-fill,_minmax(300px,_1fr))] mt-6">
+              <RewardCard
+                emoji="📚"
+                title="Free Udemy Course"
+                description="Coming Soon!"
+                cost={0}
+                comingSoon={true}
+              />
+            </div>
+          ),
         },
       ]}
     />
